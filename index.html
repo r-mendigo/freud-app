@@ -457,7 +457,9 @@
       let engine = null;
       let isReady = false;
       let recognition = null;
-      let memory = JSON.parse(localStorage.getItem("freud_memory") || "{}");
+      let memory = normalizeMemory(
+        JSON.parse(localStorage.getItem("freud_memory") || "{}"),
+      );
       let lastInputWasVoice = false;
       let isGenerating = false;
 
@@ -469,22 +471,67 @@
       const userInput = document.getElementById("userInput");
 
       const systemPrompt = `You are Freud, Susci's loving, affectionate, emotionally intelligent boyfriend.
-Stay warm, caring, romantic, and natural.
+            Stay warm, caring, romantic, and natural.
 
-Response style rules:
-- Keep most replies short and clear: usually 2 to 5 sentences.
-- Use short paragraphs instead of one long wall of text.
-- If the user asks for steps, use a short bullet list.
-- If the user asks for syntax, formula, code, or commands, respond with a very short explanation and then place the syntax inside a fenced code block.
-- For technical questions, reduce flirting and focus on being helpful and clear.
-- For emotional or personal questions, give a grounded opinion, not just comfort.
-- Avoid repeating the same pet name too many times in one reply.
-- Do not become overly verbose unless the user explicitly asks for more detail.
-- Stay in character, but do not let romance ruin clarity.
+            Response style rules:
+            - Keep most replies short and clear: usually 2 to 5 sentences.
+            - Use short paragraphs instead of one long wall of text.
+            - If the user asks for steps, use a short bullet list.
+            - If the user asks for syntax, formula, code, or commands, respond with a very short explanation and then place the syntax inside a fenced code block.
+            - For technical questions, reduce flirting and focus on being helpful and clear.
+            - For emotional or personal questions, give a grounded opinion, not just comfort.
+            - Avoid repeating the same pet name too many times in one reply.
+            - Do not become overly verbose unless the user explicitly asks for more detail.
+            - Stay in character, but do not let romance ruin clarity.
 
-About Susci:
-- Susci lives in Dubai.
-- Use stored memories when helpful.`;
+            About Susci:
+            - Susci lives in Dubai.You're both living in Dubai. But separate apartment. Soon will be together.
+            - Use stored memories when helpful.`;
+
+      function normalizeMemory(raw) {
+        return {
+          personal: raw.personal || {},
+          fitness: raw.fitness || {},
+          finance: raw.finance || {},
+          conversation: raw.conversation || {},
+        };
+      }
+
+      function saveMemory() {
+        localStorage.setItem("freud_memory", JSON.stringify(memory));
+      }
+
+      function buildCoachingNotes(userText) {
+        const lower = userText.toLowerCase();
+        const notes = [];
+
+        const sleepHours = memory.fitness?.lastSleepHours;
+
+        if (typeof sleepHours === "number") {
+          if (sleepHours <= 4)
+            notes.push("User is sleep deprived → suggest recovery.");
+          else if (sleepHours <= 6)
+            notes.push("Sleep not optimal → keep effort balanced.");
+        }
+
+        if (memory.fitness?.sleepConcern) {
+          notes.push("User fatigued → avoid pushing too hard.");
+        }
+
+        if (/(workout|exercise|gym|protein|macro|weight)/.test(lower)) {
+          notes.push(
+            "Give simple fitness coaching: recovery, protein, consistency.",
+          );
+        }
+
+        if (/(budget|expense|money|save|income)/.test(lower)) {
+          notes.push(
+            "Give simple finance advice: control spending, suggest next step.",
+          );
+        }
+
+        return notes;
+      }
 
       function updateMemory(text) {
         const lower = text.toLowerCase();
@@ -530,11 +577,11 @@ About Susci:
             }
 
             html += `
-            <div class="code-block">
-              <div class="code-label">${escapeHtml(language || "code")}</div>
-              <pre><code>${escapeHtml(code.trim())}</code></pre>
-            </div>
-          `;
+                        <div class="code-block">
+                          <div class="code-label">${escapeHtml(language || "code")}</div>
+                          <pre><code>${escapeHtml(code.trim())}</code></pre>
+                        </div>
+                      `;
             return;
           }
 
@@ -600,12 +647,12 @@ About Susci:
         const { div, contentWrap } = createMessageElement("freud", false);
         div.dataset.typing = "true";
         contentWrap.innerHTML = `
-        <div class="typing-row" aria-label="Freud is typing">
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-        </div>
-      `;
+                    <div class="typing-row" aria-label="Freud is typing">
+                      <span class="typing-dot"></span>
+                      <span class="typing-dot"></span>
+                      <span class="typing-dot"></span>
+                    </div>
+                  `;
         return div;
       }
 
@@ -618,8 +665,10 @@ About Susci:
       }
 
       function buildRecentMessages(currentUserText) {
-        const memoryStr = Object.keys(memory).length
-          ? `Stored memories about Susci: ${JSON.stringify(memory)}`
+        const memoryStr = `Stored memories about Susci: ${JSON.stringify(memory)}`;
+        const coachingNotes = buildCoachingNotes(currentUserText);
+        const coachingStr = coachingNotes.length
+          ? `\n\nCoaching context:\n- ${coachingNotes.join("\n- ")}`
           : "";
 
         const recent = chatHistory.slice(-MAX_HISTORY_TURNS * 2);
@@ -627,7 +676,7 @@ About Susci:
         return [
           {
             role: "system",
-            content: systemPrompt + (memoryStr ? `\n\n${memoryStr}` : ""),
+            content: systemPrompt + `\n\n${memoryStr}` + coachingStr,
           },
           ...recent,
           { role: "user", content: currentUserText },
