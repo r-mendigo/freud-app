@@ -14,18 +14,20 @@
       }
 
       :root {
-        --bg-1: #2a1a3a;
-        --bg-2: #1f0f2e;
+        --bg-1: #06281f; /* deep emerald */
+        --bg-2: #041914; /* darker emerald */
         --panel: rgba(0, 0, 0, 0.75);
-        --panel-2: rgba(0, 0, 0, 0.3);
-        --input-bg: #2a223a;
-        --user: #e05a8c;
-        --freud: #3a2a4a;
-        --text: #ffe6f0;
-        --muted: #ff99cc;
-        --border: #e05a8c;
-        --code-bg: rgba(0, 0, 0, 0.25);
-        --code-border: rgba(255, 153, 204, 0.28);
+        --panel-2: rgba(0, 0, 0, 0.35);
+
+        --input-bg: #0b3d2e;
+
+        --user: #1fa97a; /* emerald accent */
+        --freud: #0f2f26; /* dark green bubble */
+
+        --text: #e8fff6;
+        --muted: #9fe3c5;
+
+        --border: #d4af37; /* GOLD */
       }
 
       html,
@@ -83,6 +85,7 @@
         object-fit: cover;
         border: 3px solid var(--border);
         flex: 0 0 52px;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
       }
 
       .chat {
@@ -179,8 +182,8 @@
       }
 
       .install-btn {
-        background: var(--user);
-        color: white;
+        background: #d4af37;   
+        color: #06281f;        
         padding: 8px 16px;
         border-radius: 20px;
         font-size: 13px;
@@ -415,13 +418,13 @@
         <img
           id="freudAvatar"
           class="avatar"
-          src="https://i.postimg.cc/1tDwhvDD/4uh8g.jpg"
+          src="https://i.postimg.cc/VvGkdSxm/Confident-portrait-in-warm-lighting.png"
           alt="Freud"
         />
         <div>
           <h1 style="margin: 0; font-size: 1.4em">Freud</h1>
-          <p style="margin: 2px 0 0; color: #ff99cc; font-size: 0.95em">
-            Your Companion ❤️
+          <p style="margin: 2px 0 0; color: #d4af37; font-size: 0.95em"></p>
+            Your Companion 💚
           </p>
         </div>
       </div>
@@ -431,22 +434,22 @@
     </header>
 
     <div class="chat" id="chat"></div>
-    <div class="status" id="status">Freud is ready ❤️</div>
+    <div class="status" id="status">Freud is ready 💚</div>
 
     <div class="input-area">
       <input
         type="text"
         id="userInput"
-        placeholder="Talk to your boyfriend..."
+        placeholder="Talk to your companion..."
       />
       <button onclick="toggleVoiceInput()">🎤</button>
-      <button onclick="sendMessage()">❤️</button>
+      <button onclick="sendMessage()">➤</button>
     </div>
 
     <div class="modal" id="photoModal" onclick="this.style.display = 'none'">
       <img
         id="modalImage"
-        src="https://i.postimg.cc/1tDwhvDD/4uh8g.jpg"
+        src="https://i.postimg.cc/VvGkdSxm/Confident-portrait-in-warm-lighting.png"
         alt="Freud"
       />
     </div>
@@ -692,9 +695,9 @@
           });
 
           isReady = true;
-          status.textContent = "Freud is ready ❤️";
+          status.textContent = "Freud is ready 💚";
           const welcome =
-            "Hey my love ❤️ I've missed you. How are you feeling today, baby?";
+            "Hey my love 💚 I've missed you. How are you feeling today, baby?";
           addMessage("freud", welcome);
           chatHistory.push({ role: "assistant", content: welcome });
         } catch (err) {
